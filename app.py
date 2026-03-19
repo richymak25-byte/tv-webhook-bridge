@@ -6,11 +6,11 @@ SECRET = os.environ.get("TV_SECRET", "")
 
 LAST_SIGNAL = None
 
-@app.get("/")
+@app.route("/", methods=["GET"])
 def home():
     return "TV Webhook Bridge running"
 
-@app.post("/tv")
+@app.route("/tv", methods=["POST"])
 def webhook():
     global LAST_SIGNAL
     data = request.get_json(silent=True)
@@ -39,7 +39,7 @@ def webhook():
     print("Signal received:", LAST_SIGNAL)
     return jsonify({"status": "ok", "id": LAST_SIGNAL["id"]}), 200
 
-@app.get("/pull")
+@app.route("/pull", methods=["GET"])
 def pull():
     global LAST_SIGNAL
     sec = request.args.get("secret", "")
@@ -54,6 +54,7 @@ def pull():
     LAST_SIGNAL = None
     return jsonify({"status": "ok", "signal": sig}), 200
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# ✅ Health check pour Render
+@app.route("/healthz", methods=["GET"])
+def health():
+    return "OK", 200
